@@ -51,7 +51,9 @@ def deserialize(
     Construct a tree from a text sequence.
     """
     nodes = {}
-
+    #print("hypothesis",hypothesis)
+    #print("context",context)
+    #print("proof",proof)
     for proof_step in proof.split(";"):
         proof_step = proof_step.strip()
         if proof_step == "":

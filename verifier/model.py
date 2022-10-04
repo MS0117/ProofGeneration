@@ -25,6 +25,7 @@ class EntailmentClassifier(pl.LightningModule):
         self.pos_weight = pos_weight
         self.max_input_len = max_input_len
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
         self.encoder = AutoModel.from_pretrained(model_name)
         self.fc = nn.Linear(self.encoder.config.hidden_size, 1)
         self.metrics = {
@@ -45,6 +46,8 @@ class EntailmentClassifier(pl.LightningModule):
                 "f1": torchmetrics.F1Score(),
             },
         }
+        new_tokens=["sent{i}".format(i=j) for j in range(1,25)]+["int{i}".format(i=j) for j in range(1,25)]+["->","hypothesis"]
+        self.tokenizer.add_tokens(new_tokens)
         for split, metrics in self.metrics.items():
             for name, m in metrics.items():
                 self.add_module(f"{name}_{split}", m)

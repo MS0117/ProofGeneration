@@ -94,6 +94,7 @@ class Proof:
             if s == "":
                 continue
             self.proof_steps.append(ProofStep(self, s, strict))
+            #print("proof_steps",self.proof_steps)
 
         if requires_complete:
             assert self.is_complete()

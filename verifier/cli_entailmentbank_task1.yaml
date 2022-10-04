@@ -1,6 +1,6 @@
 seed_everything: 1
 trainer:
-  gpus: 1
+  gpus: 2
   max_epochs: 50
   callbacks:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
@@ -9,11 +9,11 @@ trainer:
 model:
   lr: 1e-5
   warmup_steps: 2000
-  model_name: roberta-large
+  model_name: roberta-base
   pos_weight: 128
 data:
   dataset: entailmentbank
-  batch_size: 128
+  batch_size: 32
   num_workers: 2
   max_num_premises: 4
   max_input_len: 256

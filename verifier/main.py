@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/root/NLProofS')
+
 from common import *
 from pytorch_lightning.utilities.cli import LightningCLI
 from verifier.datamodule import EntailmentDataModule

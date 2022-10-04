@@ -21,9 +21,17 @@ def read_entailmentbank_proofs(path: str, is_train: bool) -> List[Example]:
 
     for line in open(path):
         ex = json.loads(line)
+        #print("ex : ",ex)
+        #print("ex[hypothesis] : ", ex["hypothesis"])
+        #print("ex[context] : ", ex["context"])
+        #print("ex[proof] : ", ex["proof"])
         hypothesis = normalize(ex["hypothesis"])
         context = extract_context(ex["context"])
         proof_text = normalize(ex["proof"].strip())
+        #print("hypothesis",hypothesis)
+        #print("context", context)
+        #print("proof_text", proof_text)
+
         try:
             proof = Proof(
                 context,
@@ -38,6 +46,7 @@ def read_entailmentbank_proofs(path: str, is_train: bool) -> List[Example]:
             num_invalid += 1
 
     print(f"{len(data)} proofs loaded. {num_invalid} invalid ones removed.")
+
     return data
 
 
@@ -53,6 +62,7 @@ def read_ruletaker_proofs(path: str, is_train: bool) -> List[Example]:
         hypothesis = normalize(ex["hypothesis"])
         context = extract_context(ex["context"])
 
+
         if is_train:
             for proof in ex["proofs"]:
                 try:
@@ -65,6 +75,7 @@ def read_ruletaker_proofs(path: str, is_train: bool) -> List[Example]:
                     )
                     ans = ex["answer"]
                     assert ans == True
+
                     data.append(
                         {
                             "answer": ans,
@@ -225,6 +236,7 @@ class StepwiseDataset(Dataset):  # type: ignore
 
     def __getitem__(self, idx: int) -> Example:
         ex = self.data[idx]
+        #print("ex[idx]",ex)
         if self.is_train:
             return self.get_example_train(ex)
         else:
@@ -269,9 +281,10 @@ class StepwiseDataset(Dataset):  # type: ignore
 
     def get_example_train(self, ex: Example) -> Example:
         proof = ex["proof"].shuffle_context()
-
+        print("proof of ex",proof)
         # Sample the proof step.
         tree = proof.to_tree()
+        #print("tree of proof",tree)
         int_node = random.choice(get_internal_nodes(tree))
 
         # Sample the goal.

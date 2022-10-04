@@ -135,6 +135,8 @@ class EntailmentWriter(pl.LightningModule):
             ]  # Avoid making the verifier a submodule.
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        new_tokens=["sent{i}".format(i=j) for j in range(1,25)]+["int{i}".format(i=j) for j in range(1,25)]+["->","hypothesis"]
+        self.tokenizer.add_tokens(new_tokens)
         if (
             model_name.startswith("t5-")
             or model_name.startswith("google/t5-v1_1-")

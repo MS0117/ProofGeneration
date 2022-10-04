@@ -6,11 +6,12 @@ import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 import json
 import random
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader,Subset
 import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from rank_bm25 import BM25Okapi
-
+import numpy as np
+import random
 
 def sample_similar_sentence(query: str, corpus: List[str]) -> str:
     # Sample a sentence in `corpus` that is similar to `query`.
@@ -118,10 +119,15 @@ class EntailmentBankDataset(EntailmentDataset):
 
         for line in open(path):
             ex = json.loads(line)
+            #print("ex",ex)
             context = extract_context(ex["context"])
+            #print("context",context)
             pos, neg = self.extract_examples(ex, context)
+            #print("pos", pos)
+            #print("neg", neg)
             data.extend(pos)
             data.extend(neg)
+
             num_pos += len(pos)
             num_neg += len(neg)
 
@@ -171,6 +177,23 @@ class EntailmentBankDataset(EntailmentDataset):
 
                     if num_premises >= 2:
                         create_positive(premises, node.sent)
+                        print("pos",positives[-1])
+
+
+
+                        #@@@@3. Minsu's neg:substitution conclusion with premise, parameter how many do I have to substitute?
+                        select_num=random.randrange(len(premises))
+                        #print(premises[:select_num])
+                        #print(premises[select_num + 1:])
+                        #print(node.sent)
+                        new_premises=premises[:select_num] + premises[select_num + 1:]
+                        new_premises.append(node.sent)
+                        #print("new_premises", new_premises)
+                        create_negative(new_premises,premises[select_num])
+
+                        #print("neg",negatives[-1])
+
+
 
                         # 2. Perturbe them to generate negatives.
                         for i, p in enumerate(premises):
@@ -194,7 +217,7 @@ class EntailmentBankDataset(EntailmentDataset):
                                 if 2 <= len(subset) < num_premises:
                                     create_negative(list(subset), node.sent)
 
-        if self.split == "train":
+        if self.split == "train":           #여기서 해도 괜찮은데.. 여기서 할까? ㄴㄴ
             # Copy premises.
             leaf_sents = [node.sent for node in tree.get_leaves()]
             for s1 in leaf_sents:
@@ -264,6 +287,12 @@ class RuleTakerDataset(EntailmentDataset):
                     continue
                 else:
                     create_positive(premises, node.sent)
+
+                    #####minsu's method
+                    select_num = random.randrange(len(premises))
+                    new_premises = premises[:select_num] + premises[select_num + 1:]
+                    new_premises = append(node.sent)
+                    create_negative(new_premises,premises[select_num])
 
                 if self.split == "train":
                     if "does not " in node.sent:
